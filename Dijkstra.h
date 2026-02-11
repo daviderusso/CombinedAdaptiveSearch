@@ -21,9 +21,9 @@
       - pred: array (also of size graph->numNodes) in which the predecessor for each node is stored.
       - useSunCost: if non-zero, the weight used for shortest paths will be arc->sun_cost; otherwise, arc->cost.
 */
-void dijkstra(Graph* graph, int src, int dest, double* dist, int* pred, int useSunCost) {
+void dijkstra(Graph *graph, int src, int dest, double *dist, int *pred, int useSunCost) {
     int n = graph->numNodes;
-    MinHeap* heap = createMinHeap(n);
+    MinHeap *heap = createMinHeap(n);
 
     // Initialization of predecessors and distances
     for (int v = 0; v < n; v++) {
@@ -48,15 +48,15 @@ void dijkstra(Graph* graph, int src, int dest, double* dist, int* pred, int useS
         if (dest != -1 && u == dest)
             break;
 
-        Arc* arc = graph->nodes[u].head;
+        Arc *arc = graph->nodes[u].head;
         while (arc != NULL) {
             int v = arc->dest;
 
             // If useSunCost is enabled, use arc->sun_cost; otherwise, use arc->cost.
             double weight;
-            if (useSunCost != 0){
+            if (useSunCost != 0) {
                 weight = arc->sun_cost;
-            }else{
+            } else {
                 weight = arc->cost;
             }
 
@@ -82,22 +82,21 @@ void dijkstra(Graph* graph, int src, int dest, double* dist, int* pred, int useS
       - distToDest: array that memorizes a lower bound of the resources needed to reach the destination.
       - W: maximum number of resources available for a feasible path
 */
-void dijkstra_start(Graph* graph, int src, double* dist, int* pred, double* distToDest, float W) {
+void dijkstra_start(Graph *graph, int src, double *dist, int *pred, double *distToDest, int W) {
     int n = graph->numNodes;
     double threshold = 0;
-    MinHeap* heap = createMinHeap(n);
+    MinHeap *heap = createMinHeap(n);
 
     // Initialization of predecessors and distances
     for (int v = 0; v < n; v++) {
-
         // Threshold in case we're exploring the reverse graph
-        if (distToDest[src]!=0) {
+        if (distToDest[src] != 0) {
             threshold = distToDest[v];
         }
 
         dist[v] = FLT_MAX;
         pred[v] = -1;
-        heap->pos[v] = n+1;
+        heap->pos[v] = n + 1;
 
         // Only src and feasible nodes will be inserted in the heap
         if (v == src) {
@@ -113,15 +112,13 @@ void dijkstra_start(Graph* graph, int src, double* dist, int* pred, double* dist
         int u = extractMin(heap);
 
         if (dist[u] != FLT_MAX) {
-            Arc* arc = graph->nodes[u].head;
+            Arc *arc = graph->nodes[u].head;
             while (arc != NULL) {
-
                 int v = arc->dest;
 
-                if (isInMinHeap(heap,v)) {
-
+                if (isInMinHeap(heap, v)) {
                     // Resources are used as weights
-                    double weight= arc->cost;
+                    double weight = arc->cost;
 
                     if (dist[u] + weight < dist[v]) {
                         dist[v] = dist[u] + weight;
@@ -132,8 +129,6 @@ void dijkstra_start(Graph* graph, int src, double* dist, int* pred, double* dist
                 arc = arc->next;
             }
         }
-
-
     }
 
     freeMinHeap(heap);
@@ -141,9 +136,9 @@ void dijkstra_start(Graph* graph, int src, double* dist, int* pred, double* dist
 
 // Reconstructs the path from the source node to the destination node using the predecessor array.
 // The path is returned as a dynamic array, and its length is stored in pathLength.
-int* reconstructPath(int* pred, int dest, int NumNodes, int* pathLength) {
+int *reconstructPath(int *pred, int dest, int NumNodes, int *pathLength) {
     int maxNodes = NumNodes;
-    int* tempPath = (int*)malloc(maxNodes * sizeof(int));
+    int *tempPath = (int *) malloc(maxNodes * sizeof(int));
     int count = 0;
     int current = dest;
 
@@ -153,7 +148,7 @@ int* reconstructPath(int* pred, int dest, int NumNodes, int* pathLength) {
     }
 
     // Reverses the path since it was built backwards.
-    int* path = (int*)malloc(count * sizeof(int));
+    int *path = (int *) malloc(count * sizeof(int));
     for (int i = 0; i < count; i++) {
         path[i] = tempPath[count - 1 - i];
     }
@@ -164,17 +159,17 @@ int* reconstructPath(int* pred, int dest, int NumNodes, int* pathLength) {
 
 // Computes the sum of costs along a reconstructed path (using the 'cost' field),
 // given the graph, the path, and its length.
-double computePathCost(Graph* graph, int* path, int pathLength) {
+double computePathCost(Graph *graph, int *path, int pathLength) {
     double totalCost = 0.0f;
     // Iterates over consecutive pairs in the path.
     for (int i = 0; i < pathLength - 1; i++) {
         int u = path[i];
         int v = path[i + 1];
-        Arc* arc = graph->nodes[u].head;
+        Arc *arc = graph->nodes[u].head;
         double foundCost = -1.0f;
         while (arc != NULL) {
             if (arc->dest == v) {
-                foundCost = arc->cost;  // Or arc->sun_cost
+                foundCost = arc->cost; // Or arc->sun_cost
                 break;
             }
             arc = arc->next;
@@ -190,13 +185,13 @@ double computePathCost(Graph* graph, int* path, int pathLength) {
 
 // Computes the sum of costs along a reconstructed path (using the 'sun_cost' field),
 // given the graph, the path, and its length.
-double computePathSunCost(Graph* graph, int* path, int pathLength) {
+double computePathSunCost(Graph *graph, int *path, int pathLength) {
     double totalCost = 0.0f;
     // Iterates over consecutive pairs in the path.
     for (int i = 0; i < pathLength - 1; i++) {
         int u = path[i];
         int v = path[i + 1];
-        Arc* arc = graph->nodes[u].head;
+        Arc *arc = graph->nodes[u].head;
         double foundCost = -1.0f;
         while (arc != NULL) {
             if (arc->dest == v) {
@@ -215,7 +210,7 @@ double computePathSunCost(Graph* graph, int* path, int pathLength) {
 }
 
 // Prints the path from the source node to the target node.
-void printPath(int source, int target, int* prev) {
+void printPath(int source, int target, int *prev) {
     // Computes the length of the path (at most n nodes)
     int pathLength = 0;
     int current = target;
@@ -234,7 +229,7 @@ void printPath(int source, int target, int* prev) {
     pathLength++; // include the source node
 
     // Allocate space for the path
-    int* path = (int*)malloc(pathLength * sizeof(int));
+    int *path = (int *) malloc(pathLength * sizeof(int));
     if (!path) {
         perror("Errore allocazione memoria per path");
         exit(EXIT_FAILURE);
@@ -259,8 +254,8 @@ void printPath(int source, int target, int* prev) {
     free(path);
 }
 
-void printPathToFile(int source, int target, int* prev, const char* filename) {
-    FILE* file = fopen(filename, "w");
+void printPathToFile(int source, int target, int *prev, const char *filename) {
+    FILE *file = fopen(filename, "w");
     if (!file) {
         perror("Errore apertura file");
         return;
@@ -282,7 +277,7 @@ void printPathToFile(int source, int target, int* prev, const char* filename) {
 
     pathLength++; // include the source node
 
-    int* path = (int*)malloc(pathLength * sizeof(int));
+    int *path = (int *) malloc(pathLength * sizeof(int));
     if (!path) {
         perror("Errore allocazione memoria per path");
         fclose(file);

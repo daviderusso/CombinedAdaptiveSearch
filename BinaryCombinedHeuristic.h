@@ -55,7 +55,7 @@ typedef struct Results {
 // double TimeReadGraph - Time needed to fill the graph and the reverse graph structures.
 
 
-void BinaryCombinedHeuristic_AStar(Graph *graph, Graph *reverse_graph, int source, int destination, double W,
+void BinaryCombinedHeuristic_AStar(Graph *graph, Graph *reverse_graph, int source, int destination, int W,
                                    int TimeLimit, Results *Risultati) {
     // * Preprocessing phase * //
 

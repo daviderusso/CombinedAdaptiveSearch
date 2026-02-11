@@ -33,7 +33,6 @@ int main() {
     char filetime[256];
     snprintf(outfile, sizeof(outfile), "%s/results_heur_W.csv", res_dir);
     snprintf(filetime, sizeof(filetime), "%s/results_times_heur_W.csv", res_dir);
-
     FILE *fp = fopen(filein, "r");
     FILE *fout = fopen(outfile, "w");
     FILE *fouttime = fopen(filetime, "w");
@@ -60,7 +59,7 @@ int main() {
     char *line = buffer;
 
     int source, target;
-    double W;
+    int W;
     // Read one line at a time
     while (fgets(buffer, sizeof(buffer), fp)) {
         line = buffer;
@@ -68,8 +67,8 @@ int main() {
         buffer[strcspn(buffer, "\r\n")] = 0;
 
         // Read data from the line: "%d;%d;%lf"
-        if (sscanf(line, "%d;%d;%lf", &source, &target, &W) == 3) {
-            printf("\nsource=%d  target=%d  Budget=%lf\n", source, target, W);
+        if (sscanf(line, "%d;%d;%d", &source, &target, &W) == 3) {
+            printf("\nsource=%d  target=%d  Budget=%d\n", source, target, W);
         } else {
             fprintf(stderr, "Riga malformata: %s\n", line);
         }
@@ -88,20 +87,20 @@ int main() {
             "\nIl cammino Lambda consuma %lf risorse, e la sua lunghezza è %lf. Tempo individuazione: %lf s. Tempo impiegato: %lf s.\n",
             Risultati->BCH_Length, Risultati->BCH_SunLength, Risultati->idTime_BCH, Risultati->runtime_BCH);
 
-        fprintf(fout, "%d;%d;%lf;%lf;%lf;%lf;%lf;%lf;%lf;%lf;%lf;%lf;%lf;%lf;%d;%f;%d\n", source, target, W,
+        fprintf(fout, "%d;%d;%d;%lf;%lf;%lf;%lf;%lf;%lf;%lf;%lf;%lf;%lf;%lf;%d;%f;%d\n", source, target, W,
                 TimeReadGraph, Risultati->runtime_SP, Risultati->runtime_SPL, Risultati->SP_sumLength,
                 Risultati->SP_Length, Risultati->SPL_Length, Risultati->runtime_red, Risultati->runtime_BCH,
                 Risultati->idTime_BCH, Risultati->BCH_Length, Risultati->BCH_SunLength, Risultati->bestIter,
                 Risultati->bestLambda, Risultati->numIter);
         fflush(fout);
 
-        fprintf(fouttime, "%d;%d;%lf;%lf;%lf;%lf;%lf;%lf;%lf;%f;%f;\n", source, target, W, TimeReadGraph,
+        fprintf(fouttime, "%d;%d;%d;%lf;%lf;%lf;%lf;%lf;%lf;%f;%f;\n", source, target, W, TimeReadGraph,
                 Risultati->runtime_sptree1, Risultati->runtime_sptree2, Risultati->runtime_red,
                 Risultati->runtime_ALambda, TimeTotalHeur, Risultati->PercRedNodes, Risultati->PercRedArcs);
         fflush(fouttime);
         {
             char detailsFile[256];
-            snprintf(detailsFile, sizeof(detailsFile), "%s/%d-%d-%d_sol_details.txt", res_dir, source, target, (int) W);
+            snprintf(detailsFile, sizeof(detailsFile), "%s/%d-%d-%d_sol_details.txt", res_dir, source, target, W);
             FILE *fdetails = fopen(detailsFile, "w");
             if (fdetails != NULL) {
                 fprintf(fdetails, "length sunLength timeFound lambda iter\n");
