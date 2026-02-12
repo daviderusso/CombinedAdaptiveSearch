@@ -5,10 +5,10 @@
 #ifndef BINARYHEAP_H
 #define BINARYHEAP_H
 
-// Heap node: stores the node index and the current distance (float).
+// Heap node: stores the node index and the current distance (double).
 typedef struct {
     int node;
-    float dist;
+    double dist;
 } HeapNode;
 
 // Min-heap structure.
@@ -77,7 +77,7 @@ int extractMin(MinHeap* heap) {
 }
 
 // Inserts a new node v with key f into the heap.
-void insertHeap(MinHeap* h, int v, float f) {
+void insertHeap(MinHeap* h, int v, double f) {
     int i = h->size++;
     h->array[i].node = v;
     h->array[i].dist = f;
@@ -93,7 +93,7 @@ void insertHeap(MinHeap* h, int v, float f) {
 }
 
 // Updates the distance of a node and reorders the heap.
-void decreaseKey(MinHeap* heap, int node, float dist) {
+void decreaseKey(MinHeap* heap, int node, double dist) {
     int i = heap->pos[node];
     heap->array[i].dist = dist;
 

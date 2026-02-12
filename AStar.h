@@ -20,10 +20,10 @@
 // This function takes as input: the graph g, the source src, the destination dest, and two arrays of length n (number of nodes)
 // which will respectively contain the distance from the source to node i (dist[i]) and the predecessor of i (pred[i]).
 
-void astar(Graph* g, int src, int dest, double* dist, int* pred, int useSunCost) {
+void astar(Graph *g, int src, int dest, double *dist, int *pred, int useCost1) {
     int n = g->numNodes;
-    MinHeap* open = createMinHeap(n);
-    bool* inOpen = calloc(n, sizeof(bool));
+    MinHeap *open = createMinHeap(n);
+    bool *inOpen = calloc(n, sizeof(bool));
 
     // Initialize dist and pred
     for (int v = 0; v < n; v++) {
@@ -42,13 +42,13 @@ void astar(Graph* g, int src, int dest, double* dist, int* pred, int useSunCost)
         inOpen[u] = false;
         if (u == dest) break;
 
-        for (Arc* a = g->nodes[u].head; a; a = a->next) {
+        for (Arc *a = g->nodes[u].head; a; a = a->next) {
             int v = a->dest;
             double w;
-            if (useSunCost != 0){
-                w = a->sun_cost;
+            if (useCost1 != 0) {
+                w = a->cost1;
             } else {
-                w = a->cost;
+                w = a->cost2;
             }
             double tentative_g = dist[u] + w;
 
@@ -71,10 +71,10 @@ void astar(Graph* g, int src, int dest, double* dist, int* pred, int useSunCost)
     freeMinHeap(open);
 }
 
-void astar_lambda(Graph* g, int src, int dest, double* dist, int* pred, float lambda, double* distToDest) {
+void astar_lambda(Graph *g, int src, int dest, double *dist, int *pred, double lambda, double *distToDest) {
     int n = g->numNodes;
-    MinHeap* open = createMinHeap(n);
-    bool* inOpen = calloc(n, sizeof(bool));
+    MinHeap *open = createMinHeap(n);
+    bool *inOpen = calloc(n, sizeof(bool));
 
     // Initialize dist and pred
     for (int v = 0; v < n; v++) {
@@ -94,18 +94,19 @@ void astar_lambda(Graph* g, int src, int dest, double* dist, int* pred, float la
         inOpen[u] = false;
         if (u == dest) break;
 
-        for (Arc* a = g->nodes[u].head; a; a = a->next) {
+        for (Arc *a = g->nodes[u].head; a; a = a->next) {
             int v = a->dest;
             double w;
             // Cost selection based on the lambda value
-            w = (lambda) * a->sun_cost + (1 - lambda) * a->cost;
+            w = (lambda) * a->cost1 + (1 - lambda) * a->cost2;
 
             double tentative_g = dist[u] + w;
 
             if (tentative_g < dist[v]) {
                 dist[v] = tentative_g;
                 pred[v] = u;
-                double f = tentative_g + (lambda)*spherical_heuristic_get_explicit(g, v, dest) + (1 - lambda)*distToDest[v];
+                double f = tentative_g + (lambda) * spherical_heuristic_get_explicit(g, v, dest) + (1 - lambda) *
+                           distToDest[v];
                 // printf("\nDistance = %lf", spherical_heuristic_get_explicit(g, v, dest));
                 if (inOpen[v]) {
                     decreaseKey(open, v, f);

@@ -11,7 +11,7 @@ int main() {
 
     clock_t startReadGraph = clock();
     Graph **Grafi = readGraphAndCreateReverse(filename);
-    //Graph* graph = readGraphFromFile(filename);
+
     Graph *graph = Grafi[0];
     Graph *reverseGraph = Grafi[1];
     double TimeReadGraph = (double) (clock() - startReadGraph) / CLOCKS_PER_SEC;
@@ -52,9 +52,17 @@ int main() {
     // Headers of the CSV
     fprintf(
         fout,
-        "Source;Target;Budget;runtime_readGraph;runtime_SP_R;runtime_SP_L;Resource_SP_R;Length_SP_R;Length_SP_L;runtime_Red;runtime_BCH;id_time_BCH;Resources_BCH;Length_BCH;BestIter;BestLambda;NumIter\n");
+        "Source;Target;Budget;"
+        "runtime_readGraph;runtime_SP_C1;runtime_SP_C2;"
+        "SP1_C1;SP1_C2;SP2_C1;SP2_C2;"
+        "runtime_Red;runtime_BCH;id_time_BCH;"
+        "C1_BCH;C2_BCH;"
+        "BestIter;BestLambda;NumIter\n");
     fprintf(fouttime,
-            "Source;Target;Budget;runtime_readGraph;runtime_SPTreeSource;runtime_SPTreeDest;runtime_Red;runtime_first_lambda;runtime_BCH_total;perc_eliminated_nodes;perc_eliminated_arcs\n");
+            "Source;Target;Budget;"
+            "runtime_readGraph;runtime_SPTreeSource;runtime_SPTreeDest;runtime_Red;"
+            "runtime_first_lambda;runtime_BCH_total;"
+            "perc_eliminated_nodes;perc_eliminated_arcs\n");
 
     char *line = buffer;
 
@@ -66,7 +74,7 @@ int main() {
         // Removes '\n' in queue
         buffer[strcspn(buffer, "\r\n")] = 0;
 
-        // Read data from the line: "%d;%d;%lf"
+        // Read data from the line: "%d;%d;%d"
         if (sscanf(line, "%d;%d;%d", &source, &target, &W) == 3) {
             printf("\nsource=%d  target=%d  Budget=%d\n", source, target, W);
         } else {
@@ -76,41 +84,44 @@ int main() {
         Results *Risultati = (Results *) malloc(sizeof(Results));
 
         clock_t startHeur = clock();
-
         BinaryCombinedHeuristic_AStar(graph, reverseGraph, source, target, W, TimeLimit, Risultati);
-
         double TimeTotalHeur = (double) (clock() - startHeur) / CLOCKS_PER_SEC;
 
-        printf("\nIl cammino minimo consuma %lf risorse, e la sua lunghezza è %lf.", Risultati->SP_sumLength,
-               Risultati->SP_Length);
+        printf("\nIl cammino minimo consuma %lf risorse, e la sua lunghezza è %lf.", Risultati->SP1_C1,
+               Risultati->SP1_C2);
         printf(
             "\nIl cammino Lambda consuma %lf risorse, e la sua lunghezza è %lf. Tempo individuazione: %lf s. Tempo impiegato: %lf s.\n",
-            Risultati->BCH_Length, Risultati->BCH_SunLength, Risultati->idTime_BCH, Risultati->runtime_BCH);
+            Risultati->BCH_C2, Risultati->BCH_C1, Risultati->idTime_BCH, Risultati->runtime_BCH);
 
-        fprintf(fout, "%d;%d;%d;%lf;%lf;%lf;%lf;%lf;%lf;%lf;%lf;%lf;%lf;%lf;%d;%f;%d\n", source, target, W,
-                TimeReadGraph, Risultati->runtime_SP, Risultati->runtime_SPL, Risultati->SP_sumLength,
-                Risultati->SP_Length, Risultati->SPL_Length, Risultati->runtime_red, Risultati->runtime_BCH,
-                Risultati->idTime_BCH, Risultati->BCH_Length, Risultati->BCH_SunLength, Risultati->bestIter,
-                Risultati->bestLambda, Risultati->numIter);
+        fprintf(fout, "%d;%d;%d;%lf;%lf;%lf;%lf;%lf;%lf;%lf;%lf;%lf;%lf;%lf;%lf,%d;%f;%d\n",
+                source, target, W,
+                TimeReadGraph, Risultati->runtime_SP1, Risultati->runtime_SP2,
+                Risultati->SP1_C1, Risultati->SP1_C2, Risultati->SP2_C1, Risultati->SP2_C2,
+                Risultati->runtime_red, Risultati->runtime_BCH, Risultati->idTime_BCH,
+                Risultati->BCH_C1, Risultati->BCH_C2,
+                Risultati->bestIter, Risultati->bestLambda, Risultati->numIter);
         fflush(fout);
 
-        fprintf(fouttime, "%d;%d;%d;%lf;%lf;%lf;%lf;%lf;%lf;%f;%f;\n", source, target, W, TimeReadGraph,
-                Risultati->runtime_sptree1, Risultati->runtime_sptree2, Risultati->runtime_red,
-                Risultati->runtime_ALambda, TimeTotalHeur, Risultati->PercRedNodes, Risultati->PercRedArcs);
+        fprintf(fouttime, "%d;%d;%d;%lf;%lf;%lf;%lf;%lf;%lf;%f;%f;\n",
+                source, target, W,
+                TimeReadGraph, Risultati->runtime_sptree_source, Risultati->runtime_sptree_destination,
+                Risultati->runtime_red,
+                Risultati->runtime_ALambda, TimeTotalHeur,
+                Risultati->PercRedNodes, Risultati->PercRedArcs);
         fflush(fouttime);
         {
             char detailsFile[256];
             snprintf(detailsFile, sizeof(detailsFile), "%s/%d-%d-%d_sol_details.txt", res_dir, source, target, W);
             FILE *fdetails = fopen(detailsFile, "w");
             if (fdetails != NULL) {
-                fprintf(fdetails, "length sunLength timeFound lambda iter\n");
+                fprintf(fdetails, "c1 c2 timeFound lambda iter\n");
                 for (int i = 0; i < Risultati->numImprovements; i++) {
                     const Improvement *imp = &Risultati->improvements[i];
                     fprintf(
                         fdetails,
                         "%d %d %lf %f %d\n",
-                        (int) imp->length,
-                        (int) imp->sunLength,
+                        (int) imp->C1Length,
+                        (int) imp->C2Length,
                         imp->timeFound,
                         imp->lambda,
                         imp->iter
@@ -127,12 +138,10 @@ int main() {
 
     fclose(fp);
     fclose(fout);
-
     freeGraph(graph);
     freeGraph(reverseGraph);
-
     return 0;
 }
 
 
-//VERIFICARE ID - ALESSIO USA L'id dei nodi come l'esatto, tiziano ha tolto uno
+//QUI id dei nodi come l'esatto, tiziano usa id -1

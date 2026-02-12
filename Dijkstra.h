@@ -19,7 +19,7 @@
               if dest != -1, the algorithm stops as soon as the destination node is extracted from the queue.
       - dist: array (of size graph->numNodes) in which the minimum distances from src will be stored.
       - pred: array (also of size graph->numNodes) in which the predecessor for each node is stored.
-      - useSunCost: if non-zero, the weight used for shortest paths will be arc->sun_cost; otherwise, arc->cost.
+      - useSunCost: if non-zero, the weight used for shortest paths will be arc->cost1; otherwise, arc->cost2.
 */
 void dijkstra(Graph *graph, int src, int dest, double *dist, int *pred, int useSunCost) {
     int n = graph->numNodes;
@@ -52,12 +52,12 @@ void dijkstra(Graph *graph, int src, int dest, double *dist, int *pred, int useS
         while (arc != NULL) {
             int v = arc->dest;
 
-            // If useSunCost is enabled, use arc->sun_cost; otherwise, use arc->cost.
+            // If useSunCost is enabled, use arc->cost1; otherwise, use arc->cost2.
             double weight;
             if (useSunCost != 0) {
-                weight = arc->sun_cost;
+                weight = arc->cost1;
             } else {
-                weight = arc->cost;
+                weight = arc->cost2;
             }
 
             if (isInMinHeap(heap, v) && dist[u] != FLT_MAX && dist[u] + weight < dist[v]) {
@@ -118,7 +118,7 @@ void dijkstra_start(Graph *graph, int src, double *dist, int *pred, double *dist
 
                 if (isInMinHeap(heap, v)) {
                     // Resources are used as weights
-                    double weight = arc->cost;
+                    double weight = arc->cost2;
 
                     if (dist[u] + weight < dist[v]) {
                         dist[v] = dist[u] + weight;
@@ -157,9 +157,9 @@ int *reconstructPath(int *pred, int dest, int NumNodes, int *pathLength) {
     return path;
 }
 
-// Computes the sum of costs along a reconstructed path (using the 'cost' field),
+// Computes the sum of costs along a reconstructed path (using the 'cost2' field),
 // given the graph, the path, and its length.
-double computePathCost(Graph *graph, int *path, int pathLength) {
+double computePathCost2(Graph *graph, int *path, int pathLength) {
     double totalCost = 0.0f;
     // Iterates over consecutive pairs in the path.
     for (int i = 0; i < pathLength - 1; i++) {
@@ -169,7 +169,7 @@ double computePathCost(Graph *graph, int *path, int pathLength) {
         double foundCost = -1.0f;
         while (arc != NULL) {
             if (arc->dest == v) {
-                foundCost = arc->cost; // Or arc->sun_cost
+                foundCost = arc->cost2;
                 break;
             }
             arc = arc->next;
@@ -183,9 +183,9 @@ double computePathCost(Graph *graph, int *path, int pathLength) {
     return totalCost;
 }
 
-// Computes the sum of costs along a reconstructed path (using the 'sun_cost' field),
+// Computes the sum of costs along a reconstructed path (using the 'cost1' field),
 // given the graph, the path, and its length.
-double computePathSunCost(Graph *graph, int *path, int pathLength) {
+double computePathCost1(Graph *graph, int *path, int pathLength) {
     double totalCost = 0.0f;
     // Iterates over consecutive pairs in the path.
     for (int i = 0; i < pathLength - 1; i++) {
@@ -195,7 +195,7 @@ double computePathSunCost(Graph *graph, int *path, int pathLength) {
         double foundCost = -1.0f;
         while (arc != NULL) {
             if (arc->dest == v) {
-                foundCost = arc->sun_cost;
+                foundCost = arc->cost1;
                 break;
             }
             arc = arc->next;
