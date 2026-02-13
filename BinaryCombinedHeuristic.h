@@ -9,6 +9,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <math.h>
 #include <time.h>
 //#include "Dijkstra.h"
 #include "AStar.h"
@@ -61,7 +62,6 @@ void BinaryCombinedHeuristic_AStar(Graph *graph, Graph *reverse_graph, int sourc
     // * Preprocessing phase * //
     double *distSP = (double *) malloc(graph->numNodes * sizeof(double));
     int *predSP = (int *) malloc(graph->numNodes * sizeof(int));
-    //TODO SP MIN C1 non si trova con il valore dell'esatto
     //Shortest path evaluation (using cost1 as costs) with A*
     clock_t begin_AStarDist = clock();
     astar(graph, source, destination, distSP, predSP, 1); // SP Distances
@@ -72,6 +72,10 @@ void BinaryCombinedHeuristic_AStar(Graph *graph, Graph *reverse_graph, int sourc
     int *SP_path1 = reconstructPath(predSP, destination, graph->numNodes, pathLength1);
     double SP1_C1 = distSP[destination]; //Distance covered by the SP
     double SP1_C2 = computePathCost2(graph, SP_path1, *pathLength1); //Distance covered by the SP
+
+    // Store results
+    Risultati->SP1_C1 = SP1_C1;
+    Risultati->SP1_C2 = SP1_C2;
 
     free(pathLength1);
     free(SP_path1);
@@ -91,8 +95,13 @@ void BinaryCombinedHeuristic_AStar(Graph *graph, Graph *reverse_graph, int sourc
     int *SP_path2 = reconstructPath(predSP, destination, graph->numNodes, pathLength2);
     double SP2_C1 = computePathCost1(graph, SP_path2, *pathLength2);
 
+    // Store results
+    Risultati->SP2_C1 = SP2_C1;
+    Risultati->SP2_C2 = SP2_C2;
+
     free(SP_path2);
     free(pathLength2);
+
 
     //Graph reduction: for each node v, the minimum resources quantity needed to reach node v from source, and the quantity
     // needed to reach destination from node v are evaluated. If the sum of these two quantities is grater than the budget

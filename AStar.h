@@ -27,12 +27,12 @@ void astar(Graph *g, int src, int dest, double *dist, int *pred, int useCost1) {
 
     // Initialize dist and pred
     for (int v = 0; v < n; v++) {
-        dist[v] = FLT_MAX;
+        dist[v] = DBL_MAX;
         pred[v] = -1;
     }
 
     // Insert only src into the open-set
-    dist[src] = 0.0f;
+    dist[src] = 0.0;
     double h0 = 0;
     insertHeap(open, src, h0);
     inOpen[src] = true;
@@ -78,12 +78,12 @@ void astar_lambda(Graph *g, int src, int dest, double *dist, int *pred, double l
 
     // Initialize dist and pred
     for (int v = 0; v < n; v++) {
-        dist[v] = FLT_MAX;
+        dist[v] = DBL_MAX;
         pred[v] = -1;
     }
 
     // Insert only src into the open-set
-    dist[src] = 0.0f;
+    dist[src] = 0.0;
     // double h0 = (lambda)*spherical_heuristic_get_explicit(g, src, dest);
     double h0 = 0;
     insertHeap(open, src, h0);

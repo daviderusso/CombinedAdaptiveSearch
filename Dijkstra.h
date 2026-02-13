@@ -19,26 +19,26 @@
               if dest != -1, the algorithm stops as soon as the destination node is extracted from the queue.
       - dist: array (of size graph->numNodes) in which the minimum distances from src will be stored.
       - pred: array (also of size graph->numNodes) in which the predecessor for each node is stored.
-      - useSunCost: if non-zero, the weight used for shortest paths will be arc->cost1; otherwise, arc->cost2.
+      - useCost1: if non-zero, the weight used for shortest paths will be arc->cost1; otherwise, arc->cost2.
 */
-void dijkstra(Graph *graph, int src, int dest, double *dist, int *pred, int useSunCost) {
+void dijkstra(Graph *graph, int src, int dest, double *dist, int *pred, int useCost1) {
     int n = graph->numNodes;
     MinHeap *heap = createMinHeap(n);
 
     // Initialization of predecessors and distances
     for (int v = 0; v < n; v++) {
-        dist[v] = FLT_MAX;
+        dist[v] = DBL_MAX;
         pred[v] = -1;
         // If the Euclidean distance exceeds the threshold (K*SP_Length), then it should not be inserted into the heap
         // Add a counter for the inserted nodes to adjust the heap size accordingly
         heap->array[v].node = v;
-        heap->array[v].dist = FLT_MAX;
+        heap->array[v].dist = DBL_MAX;
         heap->pos[v] = v;
     }
 
     // Set the distance of the source to zero.
-    dist[src] = 0.0f;
-    decreaseKey(heap, src, 0.0f);
+    dist[src] = 0.0;
+    decreaseKey(heap, src, 0.0);
     heap->size = n;
 
     while (!isEmpty(heap)) {
@@ -54,13 +54,13 @@ void dijkstra(Graph *graph, int src, int dest, double *dist, int *pred, int useS
 
             // If useSunCost is enabled, use arc->cost1; otherwise, use arc->cost2.
             double weight;
-            if (useSunCost != 0) {
+            if (useCost1 != 0) {
                 weight = arc->cost1;
             } else {
                 weight = arc->cost2;
             }
 
-            if (isInMinHeap(heap, v) && dist[u] != FLT_MAX && dist[u] + weight < dist[v]) {
+            if (isInMinHeap(heap, v) && dist[u] != DBL_MAX && dist[u] + weight < dist[v]) {
                 dist[v] = dist[u] + weight;
                 pred[v] = u;
                 decreaseKey(heap, v, dist[v]);
@@ -94,16 +94,16 @@ void dijkstra_start(Graph *graph, int src, double *dist, int *pred, double *dist
             threshold = distToDest[v];
         }
 
-        dist[v] = FLT_MAX;
+        dist[v] = DBL_MAX;
         pred[v] = -1;
         heap->pos[v] = n + 1;
 
         // Only src and feasible nodes will be inserted in the heap
         if (v == src) {
-            dist[v] = 0.0f;
-            insertHeap(heap, v, 0.0f);
+            dist[v] = 0.0;
+            insertHeap(heap, v, 0.0);
         } else if (threshold <= W) {
-            insertHeap(heap, v, FLT_MAX);
+            insertHeap(heap, v, DBL_MAX);
         }
     }
 
@@ -111,7 +111,7 @@ void dijkstra_start(Graph *graph, int src, double *dist, int *pred, double *dist
         // Extract the node whose path length from source is the lowest
         int u = extractMin(heap);
 
-        if (dist[u] != FLT_MAX) {
+        if (dist[u] != DBL_MAX) {
             Arc *arc = graph->nodes[u].head;
             while (arc != NULL) {
                 int v = arc->dest;
@@ -160,7 +160,7 @@ int *reconstructPath(int *pred, int dest, int NumNodes, int *pathLength) {
 // Computes the sum of costs along a reconstructed path (using the 'cost2' field),
 // given the graph, the path, and its length.
 double computePathCost2(Graph *graph, int *path, int pathLength) {
-    double totalCost = 0.0f;
+    double totalCost = 0.0;
     // Iterates over consecutive pairs in the path.
     for (int i = 0; i < pathLength - 1; i++) {
         int u = path[i];
@@ -174,7 +174,7 @@ double computePathCost2(Graph *graph, int *path, int pathLength) {
             }
             arc = arc->next;
         }
-        if (foundCost < 0.0f) {
+        if (foundCost < 0.0) {
             fprintf(stderr, "Errore: arco da %d a %d non trovato.\n", u, v);
             exit(EXIT_FAILURE);
         }
@@ -186,7 +186,7 @@ double computePathCost2(Graph *graph, int *path, int pathLength) {
 // Computes the sum of costs along a reconstructed path (using the 'cost1' field),
 // given the graph, the path, and its length.
 double computePathCost1(Graph *graph, int *path, int pathLength) {
-    double totalCost = 0.0f;
+    double totalCost = 0.0;
     // Iterates over consecutive pairs in the path.
     for (int i = 0; i < pathLength - 1; i++) {
         int u = path[i];
@@ -200,7 +200,7 @@ double computePathCost1(Graph *graph, int *path, int pathLength) {
             }
             arc = arc->next;
         }
-        if (foundCost < 0.0f) {
+        if (foundCost < 0.0) {
             fprintf(stderr, "Errore: arco da %d a %d non trovato.\n", u, v);
             exit(EXIT_FAILURE);
         }

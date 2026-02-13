@@ -17,8 +17,8 @@ int main() {
     double TimeReadGraph = (double) (clock() - startReadGraph) / CLOCKS_PER_SEC;
 
     // const char *filein = "data/160WInstancesHeur_AP.csv";
-    // const char *filein = "data/8WInstancesHeur_AP.csv";
-    const char *filein = "data/1WInstancesHeur_AP.csv";
+    const char *filein = "data/8WInstancesHeur_AP.csv";
+    // const char *filein = "data/1WInstancesHeur_AP.csv";
     int TimeLimit = 60;
 
     const char *res_dir = "res";
@@ -84,11 +84,13 @@ int main() {
         Results *Risultati = (Results *) malloc(sizeof(Results));
 
         clock_t startHeur = clock();
-        BinaryCombinedHeuristic_AStar(graph, reverseGraph, source, target, W, TimeLimit, Risultati);
+        source = source - 1; //per allineare gli id ai test lanciati nell'esatto
+        target = target - 1; //per allineare gli id ai test lanciati nell'esatto
+        BinaryCombinedHeuristic_AStar(graph, reverseGraph, source--, target--, W, TimeLimit, Risultati);
         double TimeTotalHeur = (double) (clock() - startHeur) / CLOCKS_PER_SEC;
 
-        printf("\nIl cammino minimo consuma %lf risorse, e la sua lunghezza è %lf.", Risultati->SP1_C1,
-               Risultati->SP1_C2);
+        printf("\nIl cammino minimo consuma %lf risorse, e la sua lunghezza è %lf.", Risultati->SP1_C2,
+               Risultati->SP1_C1);
         printf(
             "\nIl cammino Lambda consuma %lf risorse, e la sua lunghezza è %lf. Tempo individuazione: %lf s. Tempo impiegato: %lf s.\n",
             Risultati->BCH_C2, Risultati->BCH_C1, Risultati->idTime_BCH, Risultati->runtime_BCH);
@@ -134,6 +136,7 @@ int main() {
         }
         free(Risultati->improvements);
         free(Risultati);
+        printf("\n---------------------------------\n");
     }
 
     fclose(fp);
@@ -143,5 +146,5 @@ int main() {
     return 0;
 }
 
-
-//QUI id dei nodi come l'esatto, tiziano usa id -1
+// IL GRAFO HA GLI ID CHE PARTONO DA 0 sia per noi che per l'esatto.
+// per le istanze va fatto -1 ai nodi source e target

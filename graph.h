@@ -220,6 +220,11 @@ Graph **readGraphAndCreateReverse(const char *filename) {
             fprintf(stderr, "Formato file errato nella riga degli archi\n");
             exit(EXIT_FAILURE);
         }
+
+        if (cost1 < 0 || cost2 < 0) {
+            printf("ERRORE - costi archi con valori negativi - C1: %lf - C2: %lf\n", cost1, cost2);
+        }
+
         addArc(g, u, v, cost1, cost2);
         addArc(g_rev, v, u, cost1, cost2);
     }
