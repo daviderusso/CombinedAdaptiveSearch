@@ -17,8 +17,8 @@ int main() {
     double TimeReadGraph = (double) (clock() - startReadGraph) / CLOCKS_PER_SEC;
 
     // const char *filein = "data/160WInstancesHeur_AP.csv";
-    const char *filein = "data/8WInstancesHeur_AP.csv";
-    // const char *filein = "data/1WInstancesHeur_AP.csv";
+    // const char *filein = "data/8WInstancesHeur_AP.csv";
+    const char *filein = "data/1WInstancesHeur_AP.csv";
     int TimeLimit = 60;
 
     const char *res_dir = "res";
@@ -86,7 +86,7 @@ int main() {
         clock_t startHeur = clock();
         source = source - 1; //per allineare gli id ai test lanciati nell'esatto
         target = target - 1; //per allineare gli id ai test lanciati nell'esatto
-        BinaryCombinedHeuristic_AStar(graph, reverseGraph, source--, target--, W, TimeLimit, Risultati);
+        BinaryCombinedHeuristic_AStar(graph, reverseGraph, source, target, W, TimeLimit, Risultati);
         double TimeTotalHeur = (double) (clock() - startHeur) / CLOCKS_PER_SEC;
 
         printf("\nIl cammino minimo consuma %lf risorse, e la sua lunghezza è %lf.", Risultati->SP1_C2,
