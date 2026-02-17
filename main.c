@@ -16,12 +16,12 @@ int main() {
     Graph *reverseGraph = Grafi[1];
     double TimeReadGraph = (double) (clock() - startReadGraph) / CLOCKS_PER_SEC;
 
-    // const char *filein = "data/160WInstancesHeur_AP.csv";
+    const char *filein = "data/160WInstancesHeur_AP.csv";
     // const char *filein = "data/8WInstancesHeur_AP.csv";
-    const char *filein = "data/1WInstancesHeur_AP.csv";
+    // const char *filein = "data/1WInstancesHeur_AP.csv";
     int TimeLimit = 60;
 
-    const char *res_dir = "res";
+    const char *res_dir = "res1";
     if (mkdir(res_dir, 0777) != 0) {
         if (errno != EEXIST) {
             perror("Errore creazione cartella res");
@@ -55,7 +55,7 @@ int main() {
         "Source;Target;Budget;"
         "runtime_readGraph;runtime_SP_C1;runtime_SP_C2;"
         "SP1_C1;SP1_C2;SP2_C1;SP2_C2;"
-        "runtime_Red;runtime_BCH;id_time_BCH;"
+        "runtime_Red;runtime_BCH;runtime_Preprocess;id_time_BCH;"
         "C1_BCH;C2_BCH;"
         "BestIter;BestLambda;NumIter\n");
     fprintf(fouttime,
@@ -87,7 +87,7 @@ int main() {
         source = source - 1; //per allineare gli id ai test lanciati nell'esatto
         target = target - 1; //per allineare gli id ai test lanciati nell'esatto
         BinaryCombinedHeuristic_AStar(graph, reverseGraph, source, target, W, TimeLimit, Risultati);
-        double TimeTotalHeur = (double) (clock() - startHeur) / CLOCKS_PER_SEC;
+        double timeTotalHeur = (double) (clock() - startHeur) / CLOCKS_PER_SEC;
 
         printf("\nIl cammino minimo consuma %lf risorse, e la sua lunghezza è %lf.", Risultati->SP1_C2,
                Risultati->SP1_C1);
@@ -95,11 +95,11 @@ int main() {
             "\nIl cammino Lambda consuma %lf risorse, e la sua lunghezza è %lf. Tempo individuazione: %lf s. Tempo impiegato: %lf s.\n",
             Risultati->BCH_C2, Risultati->BCH_C1, Risultati->idTime_BCH, Risultati->runtime_BCH);
 
-        fprintf(fout, "%d;%d;%d;%lf;%lf;%lf;%lf;%lf;%lf;%lf;%lf;%lf;%lf;%lf;%lf,%d;%f;%d\n",
+        fprintf(fout, "%d;%d;%d;%lf;%lf;%lf;%lf;%lf;%lf;%lf;%lf;%lf;%lf;%lf;%lf;%lf;%d;%f;%d\n",
                 source, target, W,
                 TimeReadGraph, Risultati->runtime_SP1, Risultati->runtime_SP2,
                 Risultati->SP1_C1, Risultati->SP1_C2, Risultati->SP2_C1, Risultati->SP2_C2,
-                Risultati->runtime_red, Risultati->runtime_BCH, Risultati->idTime_BCH,
+                Risultati->runtime_red, Risultati->runtime_BCH, Risultati->runtime_Preprocess, Risultati->idTime_BCH,
                 Risultati->BCH_C1, Risultati->BCH_C2,
                 Risultati->bestIter, Risultati->bestLambda, Risultati->numIter);
         fflush(fout);
@@ -108,7 +108,7 @@ int main() {
                 source, target, W,
                 TimeReadGraph, Risultati->runtime_sptree_source, Risultati->runtime_sptree_destination,
                 Risultati->runtime_red,
-                Risultati->runtime_ALambda, TimeTotalHeur,
+                Risultati->runtime_ALambda, timeTotalHeur,
                 Risultati->PercRedNodes, Risultati->PercRedArcs);
         fflush(fouttime);
         {

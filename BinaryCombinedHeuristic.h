@@ -35,6 +35,7 @@ typedef struct Results {
     double runtime_red;
     double runtime_ALambda;
     double runtime_BCH;
+    double runtime_Preprocess;
     double idTime_BCH;
     double BCH_C1;
     double BCH_C2;
@@ -59,6 +60,8 @@ typedef struct Results {
 
 void BinaryCombinedHeuristic_AStar(Graph *graph, Graph *reverse_graph, int source, int destination, int W,
                                    int TimeLimit, Results *Risultati) {
+    clock_t begin_heur = clock();
+
     // * Preprocessing phase * //
     double *distSP = (double *) malloc(graph->numNodes * sizeof(double));
     int *predSP = (int *) malloc(graph->numNodes * sizeof(int));
@@ -138,8 +141,10 @@ void BinaryCombinedHeuristic_AStar(Graph *graph, Graph *reverse_graph, int sourc
     printf("\nGrafo ridotto nodi: %d, archi: %d", g_red->effNodes, g_red->numEdges);
     Risultati->runtime_red = (double) (clock() - startRed) / CLOCKS_PER_SEC;
 
-    // * Start Heuristic * //
+    clock_t end_preprocess = clock();
+    Risultati->runtime_Preprocess = (double) (end_preprocess - begin_heur) / CLOCKS_PER_SEC;
 
+    // * Start Heuristic * //
     // Initialization Best parameters
     double bestSol_C1_Length = SP2_C1;
     double bestSol_C2_Length = SP2_C2;
@@ -153,9 +158,7 @@ void BinaryCombinedHeuristic_AStar(Graph *graph, Graph *reverse_graph, int sourc
     int check1 = 0;
     bool check = true;
 
-    clock_t startHeur = clock();
-
-    while ((check1 == 0) && ((double) (clock() - startHeur) / CLOCKS_PER_SEC) < TimeLimit) {
+    while ((check1 == 0) && ((double) (clock() - begin_heur) / CLOCKS_PER_SEC) < TimeLimit) {
         double currLambda = 1;
         num_iter++;
 
@@ -188,9 +191,8 @@ void BinaryCombinedHeuristic_AStar(Graph *graph, Graph *reverse_graph, int sourc
                 bestSol_C2_Length = SP_C2_length;
                 bestIter = num_iter;
                 bestLambda = currLambda;
-                bestTime = (double) (clock() - startHeur) / CLOCKS_PER_SEC;
-                // printf("\nSoluzione trovata di costo 1 %lf e costo 2 %lf", bestSol_C1_Length, bestSol_C2_Length)
-                ;
+                bestTime = (double) (clock() - begin_heur) / CLOCKS_PER_SEC;
+                // printf("\nSoluzione trovata di costo 1 %lf e costo 2 %lf", bestSol_C1_Length, bestSol_C2_Length);
                 if (Risultati->numImprovements == Risultati->capImprovements) {
                     int newCap = (Risultati->capImprovements == 0) ? 4 : (Risultati->capImprovements * 2);
                     Improvement *newArr = (Improvement *) realloc(Risultati->improvements,
@@ -224,7 +226,7 @@ void BinaryCombinedHeuristic_AStar(Graph *graph, Graph *reverse_graph, int sourc
             int maxIter = 10;
             int curr_iter = 0;
 
-            while ((curr_iter < maxIter) && ((double) (clock() - startHeur) / CLOCKS_PER_SEC < TimeLimit)) {
+            while ((curr_iter < maxIter) && ((double) (clock() - begin_heur) / CLOCKS_PER_SEC < TimeLimit)) {
                 curr_iter++;
                 num_iter++;
                 //Shortest path evaluation (using a convex combination of distances and resources as costs) with A*
@@ -254,7 +256,7 @@ void BinaryCombinedHeuristic_AStar(Graph *graph, Graph *reverse_graph, int sourc
                         bestSol_C2_Length = SP_C2_length;
                         bestIter = num_iter;
                         bestLambda = currLambda;
-                        bestTime = (double) (clock() - startHeur) / CLOCKS_PER_SEC;
+                        bestTime = (double) (clock() - begin_heur) / CLOCKS_PER_SEC;
                         // printf("\nSoluzione trovata di costo 1 %lf e costo 2 %lf", bestSol_C1_Length, bestSol_C2_Length )
                         ;
                         if (Risultati->numImprovements == Risultati->capImprovements) {
@@ -291,7 +293,7 @@ void BinaryCombinedHeuristic_AStar(Graph *graph, Graph *reverse_graph, int sourc
             free(LP_path);
             free(lambdaPathLength);
 
-            if (((double) (clock() - startHeur) / CLOCKS_PER_SEC) < TimeLimit) {
+            if (((double) (clock() - begin_heur) / CLOCKS_PER_SEC) < TimeLimit) {
                 // Exclude every node v which has a minimum resource quantity needed greater than
                 Graph *reduced = reduceGraph(g_red, distFromSource, distToDest, newW);
                 // Free the old graph since it's not needed.
@@ -304,7 +306,7 @@ void BinaryCombinedHeuristic_AStar(Graph *graph, Graph *reverse_graph, int sourc
         }
     }
 
-    clock_t endHeur = clock();
+    clock_t end_heur = clock();
 
     Risultati->PercRedNodes = (double) (graph->effNodes - g_red->effNodes) / (double) (graph->effNodes) * 100;
     Risultati->PercRedArcs = (double) (graph->numEdges - g_red->numEdges) / (double) (graph->numEdges) * 100;
@@ -318,7 +320,7 @@ void BinaryCombinedHeuristic_AStar(Graph *graph, Graph *reverse_graph, int sourc
     Risultati->SP1_C2 = SP1_C2; //calcolo sp1 prendo risorsa (min distanza)
     Risultati->SP2_C1 = SP2_C1; //calcolo sp2 prendo distanza (min risorsa)
     Risultati->SP2_C2 = SP2_C2; //calcolo sp2 prendo risorsa (min risorsa)
-    Risultati->runtime_BCH = (double) (endHeur - startHeur) / CLOCKS_PER_SEC;
+    Risultati->runtime_BCH = (double) (end_heur - begin_heur) / CLOCKS_PER_SEC;
     Risultati->idTime_BCH = bestTime;
     Risultati->BCH_C1 = bestSol_C1_Length;
     Risultati->BCH_C2 = bestSol_C2_Length;
