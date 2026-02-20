@@ -1,0 +1,17 @@
+gcc -O3 compute_paths.c -o compute_paths -lm
+
+per eseguire invece
+
+./compute_paths_fast_ex --input ./W.xy --s 5121262 --d 5261452 --W 39059190 --tl 2.0 --redh 1 --nit 10 --runall 0 --inputrunall ./runall_W.txt
+
+dove --input path_file_input --s source (presente nel file input) --d destination --W budget --tl time limit euristica --redh 1 se attivare l'albero riduzione cammini, 0 altrimenti (fate sempre 1) --nit numero di iterazioni euristica lambda (fate sempre 10)
+
+--runall 1 se eseguire tutte le istanze del file input run all, 0 se esguire la singola istanza data da --s --d --W --inputrunall path file che elenca tutte le 160 istanze
+
+
+
+ESEGUO IN BLOCCO TUTTE LE ISTANZE di una mappa
+./compute_paths --input ./data/W.xy --tl 60.0 --redh 1 --nit 10 --runall 1 --inputrunall ./data/runall_W8.txt  --outdir ./results/
+
+ESEGUO TUTTE LE ISTANZE IN UNA LISTA
+./run_compute_paths_all.sh
