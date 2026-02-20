@@ -7,7 +7,7 @@ INPUT_DIR="${SCRIPT_DIR}/data"
 BASE_OUTDIR="${SCRIPT_DIR}/runs"
 
 # Numero di ripetizioni per ogni coppia (input, runall)
-REPS=5
+REPS=1
 
 # Elenco coppie (solo nomi file, senza path)
 inputs=(
@@ -18,8 +18,7 @@ inputs=(
 )
 
 runalls=(
-  "runall_W1.txt"
-#  "runall_W.txt"
+  "runall_W.txt"
 #  "runall_USA.txt"
 #  "runall_CRT.txt"
 #  "runall_E.txt"
@@ -28,8 +27,15 @@ runalls=(
 # Parametri comuni
 TL="60.0"
 REDH="1"
-NIT="10"
 RUNALL_FLAG="1"
+
+NIT="10"
+#NIT="20"
+
+#PERC_RED="0.0"
+#PERC_RED="0.01"
+#PERC_RED="0.05"
+PERC_RED="0.1"
 
 # ===================== CHECKS =====================
 
@@ -69,7 +75,7 @@ for i in "${!inputs[@]}"; do
   in_stem="${in_file%.*}"
 
   for ((rep=1; rep<=REPS; rep++)); do
-    outdir="${BASE_OUTDIR}/${in_stem}_rep$(printf "%02d" "$rep")"
+    outdir="${BASE_OUTDIR}/${in_stem}_rep$(printf "%02d" "$rep")_nit${NIT}_perc${PERC_RED}"
     mkdir -p "$outdir"
 
     echo "==> Running: input=$in_path | rep=$rep/$REPS"
@@ -81,7 +87,8 @@ for i in "${!inputs[@]}"; do
       --nit "$NIT" \
       --runall "$RUNALL_FLAG" \
       --inputrunall "$runall_path" \
-      --outdir "$outdir"
+      --outdir "$outdir" \
+      --perc_red "$PERC_RED"
 
   done
 done

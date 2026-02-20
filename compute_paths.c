@@ -334,9 +334,9 @@ AStarResult a_star_with_bound(Graph *g, uint32_t start,
 
 		if (lambda == 0 && foward)/* && g->nodes[u].time_from_source == 0)*/ g->nodes[u].time_from_source = cost[u];
 		if (lambda == 0 && !foward)/* && g->nodes[u].time_to_dest == 0)*/ g->nodes[u].time_to_dest = cost[u];
-		if (lambda == 1 && foward)/* && g->nodes[u].dist_from_source == g->nodes[u].spherical_from_source)*/
+		if (lambda == 1 && foward) /* && g->nodes[u].dist_from_source == g->nodes[u].spherical_from_source)*/
 			g->nodes[u].dist_from_source = cost[u];
-		if (lambda == 1 && !foward)/* && g->nodes[u].dist_to_dest == g->nodes[u].spherical_to_dest)*/
+		if (lambda == 1 && !foward) /* && g->nodes[u].dist_to_dest == g->nodes[u].spherical_to_dest)*/
 			g->nodes[u].dist_to_dest = cost[u];
 
 
@@ -390,12 +390,12 @@ AStarResult a_star_with_bound(Graph *g, uint32_t start,
 				cost[v] = new_cost;
 				parent[v] = u;
 
-				if (lambda == 0 && foward)/* && g->nodes[u].time_from_source == 0)*/
+				if (lambda == 0 && foward) /* && g->nodes[u].time_from_source == 0)*/
 					g->nodes[v].time_from_source = cost[v];
 				if (lambda == 0 && !foward)/* && g->nodes[u].time_to_dest == 0)*/ g->nodes[v].time_to_dest = cost[v];
-				if (lambda == 1 && foward)/* && g->nodes[u].dist_from_source == g->nodes[u].spherical_from_source)*/
+				if (lambda == 1 && foward) /* && g->nodes[u].dist_from_source == g->nodes[u].spherical_from_source)*/
 					g->nodes[v].dist_from_source = cost[v];
-				if (lambda == 1 && !foward)/* && g->nodes[u].dist_to_dest == g->nodes[u].spherical_to_dest)*/
+				if (lambda == 1 && !foward) /* && g->nodes[u].dist_to_dest == g->nodes[u].spherical_to_dest)*/
 					g->nodes[v].dist_to_dest = cost[v];
 
 				double h = 0;
@@ -481,7 +481,7 @@ AStarResult a_star_with_bound(Graph *g, uint32_t start,
 void parse_args(int argc, char *argv[],
                 char **input_path, uint32_t *s, uint32_t *d,
                 uint64_t *W, double *time_limit, int *run_reduction_heuristic, int *max_iterations,
-                int *runall, char **inputrunall, char **output_dir) {
+                int *runall, char **inputrunall, char **output_dir, double *perc_red) {
 	*input_path = NULL;
 	*s = *d = 0;
 	*W = 0;
@@ -491,6 +491,7 @@ void parse_args(int argc, char *argv[],
 	*runall = 0;
 	*inputrunall = NULL;
 	*output_dir = (char *) ".";
+	*perc_red = 0.0;
 	for (int i = 1; i < argc; i++) {
 		if (!strcmp(argv[i], "--input")) {
 			*input_path = argv[++i];
@@ -512,6 +513,8 @@ void parse_args(int argc, char *argv[],
 			*inputrunall = argv[++i];
 		} else if (!strcmp(argv[i], "--outdir")) {
 			*output_dir = argv[++i];
+		} else if (!strcmp(argv[i], "--perc_red")) {
+			*perc_red = atof(argv[++i]);
 		} else {
 			fprintf(stderr, "Unknown argument: %s\n", argv[i]);
 			exit(EXIT_FAILURE);
@@ -523,7 +526,8 @@ void parse_args(int argc, char *argv[],
 		        "Usage: ./compute_paths "
 		        "--input file --s src --d dest --W bound "
 		        "[--tl time_limit_seconds] [--nit max_iterations] [--runall run all instances] "
-		        "[--inputrunall file run all instances] [--outdir output_directory]\n"
+		        "[--inputrunall file run all instances] [--outdir output_directory] "
+		        "[--perc_red percent_reduction]\n"
 		);
 		exit(EXIT_FAILURE);
 	}
@@ -541,10 +545,11 @@ int main(int argc, char *argv[]) {
 	int run_reduction_heuristic = 1;
 	int max_iterations;
 	int runall;
+	double perc_red;
 	double cost_spr, resource_spr, cost_spc, resource_spc;
 
 	parse_args(argc, argv, &filename, &s, &d, &W_read, &time_limit, &run_reduction_heuristic,
-	           &max_iterations, &runall, &inputrunall, &output_dir);
+	           &max_iterations, &runall, &inputrunall, &output_dir, &perc_red);
 
 	if (ensure_output_dir(output_dir) != 0) return 1;
 
@@ -689,7 +694,7 @@ int main(int argc, char *argv[]) {
 	}
 	end_read = clock();
 	printf("Graph loaded: %u nodes.\n", n_nodes);
-	printf("Time read graph: %lf\n", ((double)((double)(end_read - start_read) / CLOCKS_PER_SEC)));
+	printf("Time read graph: %lf\n", ((double) ((double) (end_read - start_read) / CLOCKS_PER_SEC)));
 	//-----------------------------------------END GRAPH READING
 	//-----------------------------------------
 	//-----------------------------------------
@@ -796,10 +801,10 @@ int main(int argc, char *argv[]) {
 				end_time_preprocess = clock();
 				end_exec = clock();
 				fprintf(fout, "%u %u %.0lf 0 0 0 0 %.3f %.3f %.3f 0.0 0.0 0 0 0\n",
-							s, d, (double) W_read,
-							((double) ((double) (end_read - start_read) / CLOCKS_PER_SEC)),
-							((double) ((double) (end_time_preprocess - start_time_preprocess) / CLOCKS_PER_SEC)),
-							((double) ((double) (end_time_preprocess - start_time_preprocess) / CLOCKS_PER_SEC)));
+				        s, d, (double) W_read,
+				        ((double) ((double) (end_read - start_read) / CLOCKS_PER_SEC)),
+				        ((double) ((double) (end_time_preprocess - start_time_preprocess) / CLOCKS_PER_SEC)),
+				        ((double) ((double) (end_time_preprocess - start_time_preprocess) / CLOCKS_PER_SEC)));
 				improvements_write_file(improvements_filename, &improvements);
 				improvements_free(&improvements);
 				continue;
@@ -815,11 +820,11 @@ int main(int argc, char *argv[]) {
 			end_time_preprocess = clock();
 			//printf("Best solution found.\n");
 			fprintf(fout, "%u %u %.0lf %.3f %.3f 0 0 %.3f %.3f %.3f 0.0 0.0 0 0 0\n",
-							s, d, (double) W_read,
-							cost_spc, resource_spc,
-							((double) ((double) (end_read - start_read) / CLOCKS_PER_SEC)),
-							((double) ((double) (end_time_preprocess - start_time_preprocess) / CLOCKS_PER_SEC)),
-							((double) ((double) (end_time_preprocess - start_time_preprocess) / CLOCKS_PER_SEC)));
+			        s, d, (double) W_read,
+			        cost_spc, resource_spc,
+			        ((double) ((double) (end_read - start_read) / CLOCKS_PER_SEC)),
+			        ((double) ((double) (end_time_preprocess - start_time_preprocess) / CLOCKS_PER_SEC)),
+			        ((double) ((double) (end_time_preprocess - start_time_preprocess) / CLOCKS_PER_SEC)));
 
 			improvements_write_file(improvements_filename, &improvements);
 			improvements_free(&improvements);
@@ -846,11 +851,11 @@ int main(int argc, char *argv[]) {
 		} else {
 			//printf("Exit: Shortest-path time is infeasible.\n");
 			fprintf(fout, "%u %u %.0lf %.3f %.3f 0 0 %.3f %.3f %.3f 0.0 0.0 0 0 0\n",
-							s, d, (double) W_read,
-							cost_spc, resource_spc,
-							((double) ((double) (end_read - start_read) / CLOCKS_PER_SEC)),
-							((double) ((double) (end_time_preprocess - start_time_preprocess) / CLOCKS_PER_SEC)),
-							((double) ((double) (end_time_preprocess - start_time_preprocess) / CLOCKS_PER_SEC)));
+			        s, d, (double) W_read,
+			        cost_spc, resource_spc,
+			        ((double) ((double) (end_read - start_read) / CLOCKS_PER_SEC)),
+			        ((double) ((double) (end_time_preprocess - start_time_preprocess) / CLOCKS_PER_SEC)),
+			        ((double) ((double) (end_time_preprocess - start_time_preprocess) / CLOCKS_PER_SEC)));
 			improvements_write_file(improvements_filename, &improvements);
 			improvements_free(&improvements);
 			continue;
@@ -864,7 +869,8 @@ int main(int argc, char *argv[]) {
 				if (i != s && i != d) {
 					if (g->nodes[i].time_to_dest + g->nodes[i].time_from_source > 0 && g->nodes[i].time_to_dest + g->
 					    nodes[i].time_from_source <= W && g->nodes[i].dist_to_dest + g->nodes[i].dist_from_source <
-					    path_best.cost) remaining++;
+					    path_best.cost)
+						remaining++;
 					else g->nodes[i].active = false;
 					if (g->nodes[i].time_from_source == 0) g->nodes[i].active = false;
 				}
@@ -883,7 +889,8 @@ int main(int argc, char *argv[]) {
 				if (i != s && i != d) {
 					if (g->nodes[i].time_to_dest + g->nodes[i].time_from_source > 0 && g->nodes[i].time_to_dest + g->
 					    nodes[i].time_from_source <= W && g->nodes[i].dist_to_dest + g->nodes[i].dist_from_source <
-					    path_best.cost) remaining++;
+					    path_best.cost)
+						remaining++;
 					else g->nodes[i].active = false;
 					if (g->nodes[i].time_to_dest == 0) g->nodes[i].active = false;
 				}
@@ -899,7 +906,8 @@ int main(int argc, char *argv[]) {
 				if (i != s && i != d) {
 					if (g->nodes[i].time_to_dest + g->nodes[i].time_from_source > 0 && g->nodes[i].time_to_dest + g->
 					    nodes[i].time_from_source <= W && g->nodes[i].dist_to_dest + g->nodes[i].dist_from_source <
-					    path_best.cost) remaining++;
+					    path_best.cost)
+						remaining++;
 					else g->nodes[i].active = false;
 				}
 		//printf("Graph reduced: %u nodes remain active.\n", remaining);
@@ -917,14 +925,15 @@ int main(int argc, char *argv[]) {
 				if (i != s && i != d) {
 					if (g->nodes[i].time_to_dest + g->nodes[i].time_from_source > 0 && g->nodes[i].time_to_dest + g->
 					    nodes[i].time_from_source <= W && g->nodes[i].dist_to_dest + g->nodes[i].dist_from_source <
-					    path_best.cost) remaining++;
+					    path_best.cost)
+						remaining++;
 					else g->nodes[i].active = false;
 				}
 
 
 		//printf("Graph reduced: %u nodes remain active.\n", remaining);
 		end_time_preprocess = clock();
-		double preprocess_time = ((double)(end_time_preprocess - start_time_preprocess) / CLOCKS_PER_SEC);
+		double preprocess_time = ((double) (end_time_preprocess - start_time_preprocess) / CLOCKS_PER_SEC);
 		//-----------------------------------------END PREPROCESS
 		//-----------------------------------------
 		//-----------------------------------------
@@ -1024,15 +1033,20 @@ int main(int argc, char *argv[]) {
 					//printf("Exit: Graph is no more connected.\n");
 					break;
 				}
-				W = path_inf.bound_path - 1e-06;
-				// W = path_inf.bound_path - (0.05 * path_inf.bound_path);//TODO questo per modificare la percentuale di riduzione
+
+				if (perc_red > 0.0 && perc_red <= 1.0) {
+					W = path_inf.bound_path - (perc_red * path_inf.bound_path);
+				} else {
+					W = path_inf.bound_path - 1e-06;
+				}
 
 				remaining = 0;
 				for (uint32_t i = 0; i < g->n_nodes; i++)
 					if (i != s && i != d) {
 						if (g->nodes[i].active && g->nodes[i].time_to_dest + g->nodes[i].time_from_source > 0 && g->
 						    nodes[i].time_to_dest + g->nodes[i].time_from_source < W && g->nodes[i].dist_to_dest + g->
-						    nodes[i].dist_from_source < path_best.cost) remaining++;
+						    nodes[i].dist_from_source < path_best.cost)
+							remaining++;
 						else g->nodes[i].active = false;
 					}
 				//printf("Graph reduced: %u nodes remain active.\n", remaining);
@@ -1062,12 +1076,12 @@ int main(int argc, char *argv[]) {
 		//printf("Best solution found.\n");
 		//printf("Cost (distance): %lf, Cost (time): %lf best_iter_red: %d best_iter_lambda %d best_lambda %lf time read graph: %.3f time-preprocessing: %.3f time heuristic %.3f total run time %.3f\n", path_best.dist_cost, path_best.time_cost, best_iter_red, best_iter_lambda, best_lambda, ((double)((double)(end_read - start_read) / CLOCKS_PER_SEC)), ((double)((double)(end_time_red- start_time_red) / CLOCKS_PER_SEC)), ((double)((double)(end_exec_lambda- start_exec_lambda) / CLOCKS_PER_SEC)), ((double)((double)(end_exec- start_exec) / CLOCKS_PER_SEC)) + ((double)((double)(end_read - start_read) / CLOCKS_PER_SEC)));
 		fprintf(fout, "%u %u %.0lf %.3f %.3f %.3f %.3f %.3f %.3f %.3f %.3f %.3f %d %.3f %d\n",
-							s, d, (double) W_read,
-							cost_spc, resource_spc, cost_spr, resource_spr,
-							((double) ((double) (end_read - start_read) / CLOCKS_PER_SEC)),
-							((double) ((double) (end_time_preprocess - start_time_preprocess) / CLOCKS_PER_SEC)),
-							((double) ((double) (end_exec - start_exec) / CLOCKS_PER_SEC)),
-							path_best.cost, path_best.resource, best_iter_lambda, best_lambda, nIt);
+		        s, d, (double) W_read,
+		        cost_spc, resource_spc, cost_spr, resource_spr,
+		        ((double) ((double) (end_read - start_read) / CLOCKS_PER_SEC)),
+		        preprocess_time,
+		        ((double) ((double) (end_exec - start_exec) / CLOCKS_PER_SEC)),
+		        path_best.cost, path_best.resource, best_iter_lambda, best_lambda, nIt);
 
 
 		fflush(fout);
