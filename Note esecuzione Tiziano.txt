@@ -15,3 +15,10 @@ ESEGUO IN BLOCCO TUTTE LE ISTANZE di una mappa
 
 ESEGUO TUTTE LE ISTANZE IN UNA LISTA
 ./run_compute_paths_all.sh
+
+
+best alg exact per instance set:
+W --> WC-A*
+USA --> WC-EBBA*par
+CTR --> WC-EBBA*par
+E --> WC-EBBA*par

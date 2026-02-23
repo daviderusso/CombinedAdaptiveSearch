@@ -12,15 +12,15 @@ REPS=1
 # Elenco coppie (solo nomi file, senza path)
 inputs=(
    "W.xy"
-#   "USA.txt"
-#   "CRT.txt"
+   "USA.txt"
+   "CTR.txt"
 #   "E.txt"
 )
 
 runalls=(
   "runall_W.txt"
-#  "runall_USA.txt"
-#  "runall_CRT.txt"
+  "runall_USA.txt"
+  "runall_CTR.txt"
 #  "runall_E.txt"
 )
 
@@ -32,10 +32,10 @@ RUNALL_FLAG="1"
 NIT="10"
 #NIT="20"
 
-#PERC_RED="0.0"
+PERC_RED="0.0"
 #PERC_RED="0.01"
 #PERC_RED="0.05"
-PERC_RED="0.1"
+#PERC_RED="0.1"
 
 # ===================== CHECKS =====================
 
